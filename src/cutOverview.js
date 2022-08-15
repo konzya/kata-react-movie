@@ -1,10 +1,11 @@
-export default function cutOverview(desc) {
-  if (desc.length < 216) return desc
+export default function cutOverview(desc, height, width) {
+  const chars = Math.floor(height / 22) * Math.floor(width / 7)
+  if (desc.length < chars) return desc
   const arrOfWords = desc.split(' ')
   let threeDots = false
   return arrOfWords.reduce((acc, word, i) => {
     if (threeDots) return acc
-    if (acc.length + word.length + 1 >= 216) {
+    if (acc.length + word.length + 1 >= chars) {
       threeDots = true
       return `${acc} ...`
     }

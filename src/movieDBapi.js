@@ -9,6 +9,7 @@ export default class MovieDBapi {
       headers: this.headers,
     })
     const body = await response.json()
+    if (body.results.length === 0) throw new Error('No such movies')
     return body
   }
 }

@@ -1,8 +1,12 @@
 .movies-list {
   max-width: 1010px;
-  padding: 16px;
+  padding: 32px;
 }
 
 .movies-list__item {
   filter: drop-shadow(0px 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+.spinner {
+  margin: 25vh auto ;
 }
