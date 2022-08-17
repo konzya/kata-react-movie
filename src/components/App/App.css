@@ -1,1 +1,19 @@
 @import '~antd/dist/antd.css';
+
+body {
+  background-color: #F7F7F7;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  max-width: 1010px;
+  background-color: white;
+  padding: 36px;
+  align-items: center;
+}
+
+.app__search {
+  margin-bottom: 32px;
+}

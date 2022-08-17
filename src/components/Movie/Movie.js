@@ -1,10 +1,13 @@
 import React from 'react'
-import { Card, Typography, Tag } from 'antd'
+import { Card, Typography, Tag, Spin } from 'antd'
 import format from 'date-fns/format'
 import parseISO from 'date-fns/parseISO'
 
 import cutOverview from '../../cutOverview'
+import MovieDBapi from '../../movieDBapi'
+
 import './Movie.css'
+import noImage from './noimage.png'
 
 const { Title, Paragraph, Text } = Typography
 
@@ -12,6 +15,7 @@ export default class Movie extends React.Component {
   state = {
     overviewHeight: 0,
     overviewWidth: 0,
+    img: null,
   }
 
   card = React.createRef()
@@ -31,6 +35,10 @@ export default class Movie extends React.Component {
   })
 
   componentDidMount() {
+    const { movie } = this.props
+    MovieDBapi.getPoster(movie.poster_path)
+      .then((url) => this.setState({ img: url }))
+      .catch(() => this.setState({ img: noImage }))
     this.resizeObserver.observe(this.card.current)
   }
 
@@ -40,14 +48,14 @@ export default class Movie extends React.Component {
 
   render() {
     const { movie } = this.props
-    const { overviewHeight, overviewWidth } = this.state
-    const url = `https://image.tmdb.org/t/p/w500/${movie.poster_path}`
-    const cover = <img src={url} alt={movie.original_title} />
-    const date = parseISO(movie.release_date)
+    const { overviewHeight, overviewWidth, img } = this.state
+    const cover = img ? <img className="cover" src={img} alt={movie.original_title} /> : <Spin />
+    const date = movie.release_date ? format(parseISO(movie.release_date), 'MMMM d, y') : 'Unknown'
+
     return (
       <Card className="movie" cover={cover} bordered={false} ref={this.card}>
-        <Title className="movie__title">{movie.original_title}</Title>
-        <Text className="movie__date">{format(date, 'MMMM d, y')}</Text>
+        <Title className="movie__title">{movie.title}</Title>
+        <Text className="movie__date">{date}</Text>
         <Tag className="movie__tag">Drama</Tag>
         <Paragraph className="movie__overview">{cutOverview(movie.overview, overviewHeight, overviewWidth)}</Paragraph>
       </Card>
