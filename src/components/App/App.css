@@ -17,3 +17,7 @@ body {
 .app__search {
   margin-bottom: 32px;
 }
+
+.app__menu {
+  margin-bottom: 20px;  
+}

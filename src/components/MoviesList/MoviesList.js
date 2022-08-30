@@ -6,12 +6,13 @@ import Movie from '../Movie/Movie'
 import './MoviesList.css'
 
 export default function MoviesList(props) {
-  const { movies, loading, error, offline } = props
+  const { movies, loading, error, offline, stars, setStars, getRatedMovies } = props
+
   let items = null
   if (movies) {
     items = movies.map((movie) => (
       <Col className="movies-list__item" xs={24} sm={24} md={24} lg={12} key={movie.id}>
-        <Movie movie={movie} />
+        <Movie movie={movie} stars={stars[movie.id]} setStars={setStars} getRatedMovies={getRatedMovies} />
       </Col>
     ))
   }

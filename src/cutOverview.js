@@ -7,6 +7,7 @@ export default function cutOverview(desc, height, width) {
     if (threeDots) return acc
     if (acc.length + word.length + 1 >= chars) {
       threeDots = true
+      if (i === 0) return acc
       return `${acc} ...`
     }
     if (i === 0) return word

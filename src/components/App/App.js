@@ -1,38 +1,61 @@
 import React from 'react'
-import { Input, Pagination } from 'antd'
+import { Input, Pagination, Menu } from 'antd'
 import { debounce } from 'lodash'
 
 import './App.css'
 import MovieDBapi from '../../movieDBapi'
 import MoviesList from '../MoviesList/MoviesList'
+import { GenreProvider } from '../GenreContext/GenreContext'
 
 export default class App extends React.Component {
   state = {
     movies: null,
+    ratedMovies: null,
     loading: false,
     error: null,
     offline: false,
     searchInputValue: '',
-    page: 0,
-    totalItems: 0,
+    paginatorMovieValue: 1,
+    totalMovies: 0,
+    paginatorRateValue: 1,
+    totalRateMovies: 0,
+    page: 'search',
+    stars: null,
+    genres: null,
   }
 
   componentDidMount() {
     window.addEventListener('offline', () => {
       this.setState({ offline: true })
     })
+    window.addEventListener('online', () => {
+      this.setState({ offline: false })
+    })
+    MovieDBapi.guestSessionInit()
+    this.loadStars()
+    this.getRatedMovies(1)
+    this.getGenres()
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { searchInputValue, page } = this.state
-    if (prevState.searchInputValue === searchInputValue && prevState.page === page) return
-    if (searchInputValue === '') {
-      this.getMovies.cancel()
-      this.endLoading()
-      return
+    const { searchInputValue, paginatorMovieValue, paginatorRateValue } = this.state
+
+    if (prevState.searchInputValue !== searchInputValue || prevState.paginatorMovieValue !== paginatorMovieValue) {
+      if (searchInputValue === '') {
+        this.getMovies.cancel()
+        this.endLoading()
+        return
+      }
+      this.startLoading()
+      this.getMovies(searchInputValue, paginatorMovieValue)
+      window.scrollTo(0, 0)
     }
-    this.startLoading()
-    this.getMovies(searchInputValue, page)
+
+    if (prevState.paginatorRateValue !== paginatorRateValue) {
+      this.startLoading()
+      this.getRatedMovies(paginatorRateValue)
+      window.scrollTo(0, 0)
+    }
   }
 
   onInputChange = (e) => {
@@ -41,12 +64,28 @@ export default class App extends React.Component {
       loading: true,
       movies: null,
       error: false,
-      page: 1,
-      totalItems: 0,
+      paginatorMovieValue: 1,
+      totalMovies: 0,
     })
   }
 
-  onPaginationChange = (page) => this.setState({ page })
+  onPaginationChange = (paginatorValue) => {
+    const { page } = this.state
+    switch (page) {
+      case 'search':
+        this.setState({ paginatorMovieValue: paginatorValue })
+        break
+      case 'rated':
+        this.setState({ paginatorRateValue: paginatorValue })
+        break
+      default:
+        break
+    }
+  }
+
+  onMenuSelect = ({ key }) => {
+    this.setState({ page: key })
+  }
 
   getMovies = debounce((searchInputValue, page) => {
     MovieDBapi.getMovies(searchInputValue, page)
@@ -55,7 +94,7 @@ export default class App extends React.Component {
         this.setState({
           movies: body.results,
           loading: false,
-          totalItems: body.total_results,
+          totalMovies: body.total_results,
         })
       })
       .catch((error) => {
@@ -66,26 +105,95 @@ export default class App extends React.Component {
       })
   }, 777)
 
+  getRatedMovies = () => {
+    const { paginatorRateValue } = this.state
+    MovieDBapi.getRatedMovies(paginatorRateValue)
+      .then((body) => {
+        this.setState({ ratedMovies: body.results, loading: false, totalRateMovies: body.total_results })
+      })
+      .catch((error) => {
+        this.setState({
+          error,
+          loading: false,
+        })
+      })
+  }
+
+  loadStars = () => {
+    const stars = localStorage.getItem('ratedMovies')
+    if (!stars) localStorage.setItem('ratedMovies', '{}')
+    this.setStars(JSON.parse(stars))
+  }
+
+  setStars = (obj) => {
+    this.setState({ stars: obj })
+  }
+
+  getGenres = () => {
+    MovieDBapi.getGenres()
+      .then((genres) => this.setState({ genres }))
+      .catch((error) => this.setState({ error }))
+  }
+
   startLoading = () => this.setState({ loading: true })
 
   endLoading = () => this.setState({ loading: false })
 
   render() {
-    const { movies, loading, error, offline, searchInputValue, page, totalItems } = this.state
+    const {
+      movies,
+      loading,
+      error,
+      offline,
+      searchInputValue,
+      page,
+      totalMovies,
+      paginatorMovieValue,
+      ratedMovies,
+      paginatorRateValue,
+      totalRateMovies,
+      stars,
+      genres,
+    } = this.state
+
+    const menu = [
+      { label: 'Search', key: 'search' },
+      { label: 'Rated', key: 'rated' },
+    ]
+
     return (
-      <section className="app">
-        <Input className="app__search" value={searchInputValue} onChange={this.onInputChange} />
-        <MoviesList movies={movies} loading={loading} error={error} offline={offline} />
-        <Pagination
-          className="app__pagination"
-          current={page}
-          total={totalItems}
-          pageSize={20}
-          hideOnSinglePage
-          showSizeChanger={false}
-          onChange={this.onPaginationChange}
-        />
-      </section>
+      <GenreProvider value={genres}>
+        <section className="app">
+          <Menu
+            className="app__menu"
+            items={menu}
+            mode="horizontal"
+            selectedKeys={[page]}
+            onSelect={this.onMenuSelect}
+          />
+          {page === 'search' ? (
+            <Input className="app__search" value={searchInputValue} onChange={this.onInputChange} />
+          ) : null}
+          <MoviesList
+            movies={page === 'search' ? movies : ratedMovies}
+            stars={stars}
+            loading={loading}
+            error={error}
+            offline={offline}
+            setStars={this.setStars}
+            getRatedMovies={this.getRatedMovies}
+          />
+          <Pagination
+            className="app__pagination"
+            current={page === 'search' ? paginatorMovieValue : paginatorRateValue}
+            total={page === 'search' ? totalMovies : totalRateMovies}
+            pageSize={20}
+            hideOnSinglePage
+            showSizeChanger={false}
+            onChange={this.onPaginationChange}
+          />
+        </section>
+      </GenreProvider>
     )
   }
 }

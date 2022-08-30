@@ -23,7 +23,6 @@
   filter: drop-shadow(0px 4px 12px rgba(0, 0, 0, 0.15));
 }
 
-
 h1.ant-typography {
   font-family: 'Inter';
   font-style: normal;
@@ -34,27 +33,36 @@ h1.ant-typography {
   color: black;
 }
 
+.movie__title {
+  margin-right: 30px;
+}
+
+.movie__rating {
+  position: absolute;
+  display: flex;
+  align-items: center;  
+  right: 12px;
+  top: 12px;
+  background-color: transparent;
+  border: 2px solid;
+}
+
+.ant-avatar-string {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 22px;  
+  color: #000000;    
+}
+
 .movie__date {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 400;
   font-size: 12px;
   line-height: 22px;
-  color: #827E7E;
-  margin-bottom: 7px;
-}
-
-.movie__tag {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 15px;
-  color: rgba(0, 0, 0, 0.65);
-  background: #FAFAFA;
-  border: 1px solid #D9D9D9;
-  border-radius: 2px;
-  padding: 4px;
+  color: #827e7e;
   margin-bottom: 7px;
 }
 
@@ -65,4 +73,10 @@ h1.ant-typography {
   font-size: 12px;
   line-height: 22px;
   color: #000000;
+}
+
+.movie__rate {
+  margin-top: auto;
+  margin-bottom: 15px;
+  font-size: 15px;
 }
