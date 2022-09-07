@@ -29,3 +29,24 @@ body {
 .app__menu {
   margin-bottom: 20px;  
 }
+
+.ant-pagination-item-active {
+  background-color: #1890FF;
+  color: white;
+  border-radius: 4px;
+}
+
+.ant-pagination-item-active a {
+  color: white;
+}
+
+.ant-pagination-item-active a:hover {
+  color: black;
+}
+
+@media (max-width: 576px) {
+  .app {    
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}

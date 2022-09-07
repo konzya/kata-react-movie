@@ -1,6 +1,7 @@
 .movies-list {
   max-width: 1010px;
   width: 100%;
+  margin-bottom: 40px;
 }
 
 .movies-list__item {

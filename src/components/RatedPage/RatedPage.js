@@ -77,6 +77,7 @@ export default class RatedPage extends React.Component {
           current={paginationValue}
           total={totalMovies}
           pageSize={20}
+          size="small"
           hideOnSinglePage
           showSizeChanger={false}
           onChange={this.onPaginationChange}
