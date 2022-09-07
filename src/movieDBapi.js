@@ -10,15 +10,12 @@ export default class MovieDBapi {
 
   static async guestSessionInit() {
     this.guestSessionId = localStorage.getItem('guestSessionId')
-    console.log(localStorage.getItem('guestSessionId'))
-    console.log(this.guestSessionId)
+
     if (!this.guestSessionId) {
       const response = await this.createGuestSession()
       this.guestSessionId = response.guest_session_id
       localStorage.setItem('guestSessionId', response.guest_session_id)
     }
-
-    return true
   }
 
   static async createGuestSession() {
@@ -26,7 +23,6 @@ export default class MovieDBapi {
       headers: this.headers,
     })
     const body = await response.json()
-    console.log(body)
     return body
   }
 
@@ -51,8 +47,6 @@ export default class MovieDBapi {
       }&page=${page}}`
     )
     const body = await response.json()
-    console.log(body)
-    console.log(response)
     return body
   }
 
@@ -81,10 +75,7 @@ export default class MovieDBapi {
       }
     )
     const body = await response.json()
-    console.log(body.success)
     if (body.success !== true) throw new Error('failed to rate')
-    console.log(body)
-    console.log(response)
     return body
   }
 

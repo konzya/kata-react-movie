@@ -78,5 +78,50 @@ h1.ant-typography {
 .movie__rate {
   margin-top: auto;
   margin-bottom: 15px;
-  font-size: 15px;
+  font-size: 14px;
+}
+
+
+@media (max-width: 576px) {
+  .ant-card {
+    height: 245px;
+  }
+
+  .ant-card-body {
+    padding: 4px 10px 0px;
+    width: 100%;
+  }
+
+  .ant-card-cover {
+    position: absolute;
+    width: 60px;
+    max-height: 91px;
+    top: 6px;
+    left: 10px;
+  }
+
+  .movie__title {
+    margin-left: 73px;
+    margin-right: 40px;
+    min-height: 28px;    
+  }
+
+  .movie__genres {
+    margin-left: 73px;
+    margin-bottom: 10px;
+    min-height: 32px;
+  }
+
+  .movie__date {
+    margin-left: 73px;
+    min-height: 22px;
+  }
+
+  .movie__rate {
+    margin-left: auto;
+  }
+
+  .movie__rating {
+    top: 4px;
+  }
 }

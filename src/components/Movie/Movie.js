@@ -3,8 +3,7 @@ import { Card, Typography, Spin, Rate, Avatar } from 'antd'
 import format from 'date-fns/format'
 import parseISO from 'date-fns/parseISO'
 
-import cutOverview from '../../cutOverview'
-import decideRatingColor from '../../decideRatingColor'
+import { decideRatingColor, cutOverview } from '../../helpers'
 import MovieDBapi from '../../movieDBapi'
 import './Movie.css'
 import GenreList from '../GenreList/GenreList'
@@ -18,7 +17,9 @@ export default class Movie extends React.Component {
   state = {
     overviewHeight: 0,
     overviewWidth: 0,
+    titleWidth: 0,
     img: null,
+    stars: 0,
   }
 
   card = React.createRef()
@@ -32,7 +33,11 @@ export default class Movie extends React.Component {
         const tagHeight = card.querySelector('.movie__genres').scrollHeight
         const overviewHeight = card.scrollHeight - tagHeight - dateHeight - titleHeight - 85
         const overviewWidth = card.querySelector('.ant-card-body').scrollWidth - 40
-        this.setState({ overviewHeight, overviewWidth })
+        const title = card.querySelector('.movie__title')
+        const titleMarginLeft = parseInt(getComputedStyle(title).marginLeft, 10)
+        const titleMarginRight = parseInt(getComputedStyle(title).marginRight, 10)
+        const titleWidth = card.querySelector('.ant-card-body').scrollWidth - titleMarginLeft - titleMarginRight
+        this.setState({ overviewHeight, overviewWidth, titleWidth })
       }, 200)
     })
   })
@@ -44,6 +49,15 @@ export default class Movie extends React.Component {
       .then((url) => this.setState({ img: url }))
       .catch(() => this.setState({ img: noImage }))
 
+    try {
+      const stars = JSON.parse(localStorage.getItem('stars'))
+      if (stars[movie.id]) {
+        this.setState({ stars: stars[movie.id] })
+      }
+    } catch {
+      localStorage.setItem('stars', '{}')
+    }
+
     this.resizeObserver.observe(this.card.current)
   }
 
@@ -52,26 +66,25 @@ export default class Movie extends React.Component {
   }
 
   onRate = (value) => {
-    const { movie, setStars, getRatedMovies } = this.props
+    const { movie } = this.props
     MovieDBapi.rateMovie(movie.id, value).then(() => {
-      const ratedMovies = localStorage.getItem('ratedMovies')
-      if (!ratedMovies) localStorage.setItem('ratedMovies', '{}')
-      const newObject = JSON.parse(ratedMovies)
+      const stars = localStorage.getItem('stars')
+      if (!stars) localStorage.setItem('stars', '{}')
+      const newObject = JSON.parse(stars)
       newObject[movie.id] = value
-      localStorage.setItem('ratedMovies', JSON.stringify(newObject))
-      setStars(newObject)
-      setTimeout(() => getRatedMovies(), 1000)
+      localStorage.setItem('stars', JSON.stringify(newObject))
+      this.setState({ stars: value })
     })
   }
 
   render() {
-    const { movie, stars } = this.props
-    const { overviewHeight, overviewWidth, img } = this.state
+    const { movie } = this.props
+    const { overviewHeight, overviewWidth, titleWidth, img, stars } = this.state
     const cover = img ? <img className="cover" src={img} alt={movie.original_title} /> : <Spin />
     const date = movie.release_date ? format(parseISO(movie.release_date), 'MMMM d, y') : null
     return (
       <Card className="movie" cover={cover} bordered={false} ref={this.card}>
-        <Title className="movie__title">{movie.title}</Title>
+        <Title className="movie__title">{cutOverview(movie.title, 28, titleWidth, 28, 12)}</Title>
         <Avatar
           className="movie__rating"
           size={30}
@@ -85,7 +98,9 @@ export default class Movie extends React.Component {
         <GenreConsumer>
           {(genresList) => <GenreList genresList={genresList} movieGenres={movie.genre_ids} />}
         </GenreConsumer>
-        <Paragraph className="movie__overview">{cutOverview(movie.overview, overviewHeight, overviewWidth)}</Paragraph>
+        <Paragraph className="movie__overview">
+          {cutOverview(movie.overview, overviewHeight, overviewWidth, 22, 7)}
+        </Paragraph>
         <Rate className="movie__rate" allowHalf defaultValue={0} count={10} onChange={this.onRate} value={stars} />
       </Card>
     )
